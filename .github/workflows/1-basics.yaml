@@ -1,7 +1,6 @@
 name: Practice 1 - GitHub Actions Basics
 
-on:
-  workflow_dispatch:
+on: [push]
 
 jobs:
   hello-job:
