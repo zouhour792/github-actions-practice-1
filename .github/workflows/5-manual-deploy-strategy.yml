@@ -1,0 +1,24 @@
+name: Manual Deployment Controller
+on:
+  workflow_dispatch:
+    inputs:
+    # Your 5 inputs here (environment, version, skip_tests, strategy, channel)
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    steps:
+    # Your validation steps here
+
+  deploy:
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    steps:
+    # Your deployment steps here
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()  # Run even if deployment fails
+    steps:
+    # Your notification steps here
