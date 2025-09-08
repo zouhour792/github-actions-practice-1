@@ -91,7 +91,6 @@ jobs:
         run: |
           echo "=== String Transformations ==="
           echo "Original ref: ${{ github.ref }}"
-          echo "Clean branch name: ${{ replace(github.ref, 'refs/heads/', '') }}"
           echo "Uppercase branch: ${{ upper(github.ref_name) }}"
           echo "Lowercase branch: ${{ lower(github.ref_name) }}"
           echo "Branch contains 'main': ${{ contains(github.ref_name, 'main') }}"
