@@ -1,4 +1,10 @@
 name: Workflow Events
-on:
+on: [push,pull_request, workflow_dispatch]
 
 jobs:
+  hello-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo
+        run: echo "I've been triggered by ${{ github.event_name }} event"
+
