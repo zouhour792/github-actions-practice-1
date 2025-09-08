@@ -51,12 +51,56 @@ jobs:
           echo "DATABASE_URL env: ${{ env.DATABASE_URL }}"
           echo "API key configured: ${{ secrets.TEST_API_KEY != '' && 'YES' || 'NO' }}"
           echo "Database URL starts with 'postgresql': ${{ startsWith(secrets.DATABASE_URL, 'postgresql') }}"
-        
+  logic-operations:
+    needs: context-explorer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Main Branch Detection
+        if: github.ref_name == 'main'
+        run: echo "This is the main branch - Production mode"
 
-#  logic-operations:
-#    needs: context-explorer
-#    runs-on: ubuntu-latest
-#    steps:
-#    # Your Step 1: Branch-based Conditional Steps (3 separate conditional steps)
-#    # Your Step 2: OS Conditional Steps (3 separate conditional steps)
-#    # Your Step 3: String Manipulation Functions
+      - name: Feature Branch Detection
+        if: startsWith(github.ref_name, 'feature/')
+        run: echo "This is a feature branch - Development mode"
+
+      - name: Other Branch Detection
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'feature/')
+        run: echo "This is another type of branch - Testing mode"
+
+      # Step 2: OS Conditional Steps
+      - name: Linux Step
+        if: runner.os == 'Linux'
+        run: |
+          echo "🐧 Running on Linux - using apt package manager"
+          echo "Linux runner detected: ${{ runner.os }}"
+
+      - name: macOS Step
+        if: runner.os == 'macOS'
+        run: |
+          echo "🍎 Running on macOS - using homebrew package manager"
+          echo "macOS runner detected: ${{ runner.os }}"
+
+      - name: Windows Step
+        if: runner.os == 'Windows'
+        run: |
+          echo "🪟 Running on Windows - using chocolatey package manager"
+          echo "Windows runner detected: ${{ runner.os }}"
+
+      # Step 3: String Manipulation Functions
+      - name: String Transformations
+        run: |
+          echo "=== String Transformations ==="
+          echo "Original ref: ${{ github.ref }}"
+          echo "Clean branch name: ${{ replace(github.ref, 'refs/heads/', '') }}"
+          echo "Uppercase branch: ${{ upper(github.ref_name) }}"
+          echo "Lowercase branch: ${{ lower(github.ref_name) }}"
+          echo "Branch contains 'main': ${{ contains(github.ref_name, 'main') }}"
+          echo "Branch starts with 'feature': ${{ startsWith(github.ref_name, 'feature/') }}"
+
+      - name: Conditional Logic
+        run: |
+          echo "=== Conditional Logic ==="
+          echo "Environment type: ${{ github.ref_name == 'main' && 'production' || 'development' }}"
+          echo "Runner type: ${{ runner.os == 'Linux' && 'unix' || 'other' }}"
+          echo "Branch category: ${{ startsWith(github.ref_name, 'feature/') && 'feature' || 'stable' }}"
+
