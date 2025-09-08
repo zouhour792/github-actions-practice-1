@@ -1,24 +1,137 @@
 name: Manual Deployment Controller
+
 on:
   workflow_dispatch:
     inputs:
-    # Your 5 inputs here (environment, version, skip_tests, strategy, channel)
+      environment:
+        description: "Choose target environment"
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+          - development
+      version:
+        description: "Version or tag to deploy (e.g., v1.2.3)"
+        required: true
+        default: latest
+        type: string
+      skip_tests:
+        description: "Skip testing phase (use with caution)"
+        required: false
+        default: false
+        type: boolean
+      strategy:
+        description: "Deployment strategy"
+        required: true
+        default: rolling
+        type: choice
+        options:
+          - rolling
+          - blue-green
+          - canary
+      channel:
+        description: "Slack channel for notifications (optional)"
+        required: false
+        default: "#deployments"
+        type: string
 
 jobs:
   validate-inputs:
     runs-on: ubuntu-latest
     steps:
-    # Your validation steps here
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Display Deployment Summary
+        run: |
+          echo "=== Deployment Summary ==="
+          echo "🎯 Target Environment: ${{ github.event.inputs.environment }}"
+          echo "📦 Version: ${{ github.event.inputs.version }}"
+          echo "🧪 Skip Tests: ${{ github.event.inputs.skip_tests }}"
+          echo "🚀 Strategy: ${{ github.event.inputs.strategy }}"
+          echo "📢 Notification Channel: ${{ github.event.inputs.channel }}"
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "⏰ Deployment Time: $(date)"
+
+      - name: Environment-specific validation
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "⚠️ Warning: You are deploying to PRODUCTION!"
+          elif [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "ℹ️ Info: Deploying to staging environment"
+          else
+            echo "🐞 Debug: Deploying to development environment"
+          fi
+
+      - name: Version Validation
+        run: |
+          echo "=== Version Validation ==="
+          VERSION="${{ github.event.inputs.version }}"
+          if [ "$VERSION" == "latest" ]; then
+            echo "⚠️ Using latest version - consider using a specific tag"
+          else
+            echo "✅ Using specific version: $VERSION"
+          fi
 
   deploy:
     needs: validate-inputs
     runs-on: ubuntu-latest
     steps:
-    # Your deployment steps here
+      - name: Pre-deployment Checks
+        run: |
+          echo "=== Pre-deployment Checks ==="
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Strategy: ${{ github.event.inputs.strategy }}"
+          echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
+
+      - name: Run Tests
+        if: github.event.inputs.skip_tests == 'false'
+        run: |
+          echo "🧪 Running tests for version ${{ github.event.inputs.version }}..."
+          echo "✅ All tests passed!"
+
+      - name: Environment-specific Deployment
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          echo "=== Deploying to $ENV environment ==="
+          if [ "$ENV" == "production" ]; then
+            echo "⚠️ Extra confirmation required for production"
+          fi
+
+      - name: Deployment Strategy
+        run: |
+          STRATEGY="${{ github.event.inputs.strategy }}"
+          echo "=== Deploying with $STRATEGY strategy ==="
+          if [ "$STRATEGY" == "blue-green" ]; then
+            echo "🔵🟢 Blue-Green deployment simulated"
+          elif [ "$STRATEGY" == "canary" ]; then
+            echo "🟡 Canary deployment simulated"
+          else
+            echo "🔁 Rolling deployment simulated"
+          fi
 
   notify:
     needs: deploy
     runs-on: ubuntu-latest
-    if: always()  # Run even if deployment fails
+    if: always()
     steps:
-    # Your notification steps here
+      - name: Deployment Status
+        run: |
+          echo "=== Deployment Status ==="
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
+          if [ ${{ needs.deploy.result }} == "success" ]; then
+            STATUS="✅ SUCCESS"
+          else
+            STATUS="❌ FAILURE"
+          fi
+          echo "Status: $STATUS"
+
+      - name: Notification
+        run: |
+          echo "📢 Sending notification to: ${{ github.event.inputs.channel }}"
+          echo "🔗 Deployment details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "Message: Deployment $STATUS for version ${{ github.event.inputs.version }} to ${{ github.event.inputs.environment }}"
