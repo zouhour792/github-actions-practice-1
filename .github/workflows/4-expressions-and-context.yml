@@ -11,15 +11,52 @@ jobs:
       BUILD_ENV: 'development'
       APP_NAME: 'TestApp'
     steps:
-    # Your Step 1: GitHub Context Information
-    # Your Step 2: Runner Environment Information
-    # Your Step 3: Environment Variables Test
-    # Your Step 4: Secrets Context Test
+      - name: GitHub Context
+        run: |
+          echo "=== Workflow Summary ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Event type: ${{ github.event_name }}"
+          echo "Run number: ${{ github.run_number }}"
+          echo "Workflow name: ${{ github.workflow }}"
 
-  logic-operations:
-    needs: context-explorer
-    runs-on: ubuntu-latest
-    steps:
-    # Your Step 1: Branch-based Conditional Steps (3 separate conditional steps)
-    # Your Step 2: OS Conditional Steps (3 separate conditional steps)
-    # Your Step 3: String Manipulation Functions
+      - name: Runner Environment
+        run: |
+          echo "Operating System: ${{ runner.os }}"
+          echo "Architecture: ${{ runner.arch }}"
+          echo "Runner name: ${{ runner.name }}"
+          echo "Tool cache directory: ${{ runner.tool_cache }}"
+          echo "Temporary directory: ${{ runner.temp }}"
+
+      - name: Environment Variables
+        run: |
+          echo "=== Environment Variables ==="
+          echo "Node version from env: ${{ env.NODE_VERSION }}"
+          echo "Build environment: ${{ env.BUILD_ENV }}"
+          echo "Application name: ${{ env.APP_NAME }}"
+          echo "System PATH exists: ${{ env.PATH != '' }}"
+          echo "Home directory: ${{ env.HOME }}"
+        
+
+      - name: Secrets Availability Check
+        env:
+          TEST_API_KEY: "key"
+          DATABASE_URL: "db url"
+        run: |
+          echo "=== Secrets Availability Check ==="
+          echo "Has TEST_API_KEY secret: ${{ secrets.TEST_API_KEY != '' }}"
+          echo "Has DATABASE_URL secret: ${{ secrets.DATABASE_URL != '' }}"
+          echo "TEST_API_KEY env: ${{ env.TEST_API_KEY }}"
+          echo "DATABASE_URL env: ${{ env.DATABASE_URL }}"
+          echo "API key configured: ${{ secrets.TEST_API_KEY != '' && 'YES' || 'NO' }}"
+          echo "Database URL starts with 'postgresql': ${{ startsWith(secrets.DATABASE_URL, 'postgresql') }}"
+        
+
+#  logic-operations:
+#    needs: context-explorer
+#    runs-on: ubuntu-latest
+#    steps:
+#    # Your Step 1: Branch-based Conditional Steps (3 separate conditional steps)
+#    # Your Step 2: OS Conditional Steps (3 separate conditional steps)
+#    # Your Step 3: String Manipulation Functions
