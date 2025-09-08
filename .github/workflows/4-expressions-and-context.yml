@@ -91,7 +91,6 @@ jobs:
         run: |
           echo "=== String Transformations ==="
           echo "Original ref: ${{ github.ref }}"
-          echo "Uppercase branch: ${{ Uppercase(github.ref_name) }}"
           echo "Branch contains 'main': ${{ contains(github.ref_name, 'main') }}"
           echo "Branch starts with 'feature': ${{ startsWith(github.ref_name, 'feature/') }}"
 
